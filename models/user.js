@@ -29,5 +29,14 @@ module.exports = function (sequelize, DataTypes) {
             allowNull: true
         }
     });
+    // Hashing passwords upon creation and modification
+    User.beforeCreate((user, options) => {
+        user.password = require('crypto').createHash('sha256').update(user.password).digest('hex');
+    });
+    User.beforeUpdate((user, options) => {
+        if (user.changed('password')) {
+            user.password = require('crypto').createHash('sha256').update(user.password).digest('hex');
+        }
+    });
     return User;
 };
