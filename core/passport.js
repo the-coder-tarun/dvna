@@ -3,6 +3,7 @@ var LocalStrategy = require('passport-local').Strategy
 var bCrypt = require('bcrypt')
 
 module.exports = function (passport) {
+
     passport.serializeUser(function (user, done) {
         done(null, user.id)
     });
@@ -26,10 +27,9 @@ module.exports = function (passport) {
             passReqToCallback: true
         },
         function (req, username, password, done) {
-            var safeUsername = db.sequelize.escape(username);
             db.User.findOne({
                 where: {
-                    'login': safeUsername
+                    'login': username
                 }
             }).then(function (user) {
                 if (!user) {
@@ -44,7 +44,12 @@ module.exports = function (passport) {
 )
 
     var isValidPassword = function (user, password) {
-        return bCrypt.compareSync(password, user.password);
+        return bCrypt.compare(password, user.password, function(err, res) {
+            if (err) {
+                return false;
+            }
+            return res;
+        });
     }
 
     passport.use('signup', new LocalStrategy({
@@ -52,10 +57,9 @@ module.exports = function (passport) {
         },
         function (req, username, password, done) {
             findOrCreateUser = function () {
-                var safeEmail = db.sequelize.escape(username);
                 db.User.findOne({
                     where: {
-                        'email': safeEmail
+                        'email': username
                     }
                 }).then(function (user) {
                     if (user) {
@@ -87,4 +91,5 @@ module.exports = function (passport) {
     var createHash = function (password) {
         return bCrypt.hashSync(password, bCrypt.genSaltSync(10), null);
     }
+
 }
