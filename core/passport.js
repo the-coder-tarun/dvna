@@ -2,7 +2,6 @@ var db = require('../models')
 var LocalStrategy = require('passport-local').Strategy
 var bCrypt = require('bcrypt')
 
-
 module.exports = function (passport) {
 
     passport.serializeUser(function (user, done) {
@@ -41,7 +40,8 @@ module.exports = function (passport) {
                 }
                 return done(null, user);
             });
-        }))
+        })
+)
 
     var isValidPassword = function (user, password) {
         return bCrypt.compareSync(password, user.password);
@@ -80,10 +80,10 @@ module.exports = function (passport) {
                 });
             };
             process.nextTick(findOrCreateUser)
-        }));
+        })
+)
 
     var createHash = function (password) {
-        return bCrypt.hashSync(password, bCrypt.genSaltSync(10), null);
+        return bCrypt.hashSync(password, bCrypt.genSaltSync(12), null);
     }
-
 }
