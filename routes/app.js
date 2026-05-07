@@ -35,7 +35,7 @@ module.exports = function () {
 
     router.get('/admin', authHandler.isAuthenticated, function (req, res) {
         res.render('app/admin', {
-            admin: (req.user.role == 'admin')
+            admin: req.user.role === 'admin'
         })
     })
 

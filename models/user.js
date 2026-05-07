@@ -29,5 +29,6 @@ module.exports = function (sequelize, DataTypes) {
             allowNull: true
         }
     });
+    // Hashing passwords upon creation or update is not handled here, consider using a library like bcrypt to securely store passwords.
     return User;
 };
