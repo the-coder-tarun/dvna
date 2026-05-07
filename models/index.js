@@ -7,14 +7,7 @@ var env = process.env.NODE_ENV || "development";
 var config = require("../config/db.js")
 
 if (process.env.DATABASE_URL) {
-  var url = new URL(process.env.DATABASE_URL);
-  var sequelize = new Sequelize(url.pathname.substring(1), url.username, url.password, {
-    host: url.hostname,
-    dialect: url.protocol.substring(0, url.protocol.length - 1),
-    dialectOptions: {
-      ssl: true
-    }
-  });
+  var sequelize = new Sequelize(process.env.DATABASE_URL);
 } else {
   var sequelize = new Sequelize(config.database, config.username, config.password, {
     host: config.host,
@@ -44,7 +37,7 @@ var db = {};
 fs
   .readdirSync(__dirname)
   .filter(function (file) {
-    return (file.indexOf(".") !== 0) && (file !== "index.js");
+    return (file.indexOf(".") !== 0) && (file !== "index.js") && path.extname(file) === '.js';
   })
   .forEach(function (file) {
     var model = sequelize.import(path.join(__dirname, file));
