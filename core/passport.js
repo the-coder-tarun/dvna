@@ -2,9 +2,7 @@ var db = require('../models')
 var LocalStrategy = require('passport-local').Strategy
 var bCrypt = require('bcrypt')
 
-
 module.exports = function (passport) {
-
     passport.serializeUser(function (user, done) {
         done(null, user.id)
     });
@@ -28,6 +26,9 @@ module.exports = function (passport) {
             passReqToCallback: true
         },
         function (req, username, password, done) {
+            if (!username || !password) {
+                return done(null, false, req.flash('danger', 'Invalid Credentials'))
+            }
             db.User.findOne({
                 where: {
                     'login': username
@@ -41,7 +42,8 @@ module.exports = function (passport) {
                 }
                 return done(null, user);
             });
-        }))
+        })
+)
 
     var isValidPassword = function (user, password) {
         return bCrypt.compareSync(password, user.password);
@@ -52,6 +54,9 @@ module.exports = function (passport) {
         },
         function (req, username, password, done) {
             findOrCreateUser = function () {
+                if (!username || !password) {
+                    return done(null, false, req.flash('danger', 'Input field(s) missing'));
+                }
                 db.User.findOne({
                     where: {
                         'email': username
@@ -80,10 +85,10 @@ module.exports = function (passport) {
                 });
             };
             process.nextTick(findOrCreateUser)
-        }));
+        })
+)
 
     var createHash = function (password) {
         return bCrypt.hashSync(password, bCrypt.genSaltSync(10), null);
     }
-
 }
