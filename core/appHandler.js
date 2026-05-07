@@ -36,8 +36,10 @@ module.exports.userSearch = function (req, res) {
 }
 
 module.exports.ping = function (req, res) {
-	exec('ping -c 2 ' + req.body.address, function (err, stdout, stderr) {
-		output = stdout + stderr
+	db.Product.findAll().then(products => {
+		output = {
+			products: products
+		}
 		res.render('app/ping', {
 			output: output
 		})
@@ -145,35 +147,35 @@ module.exports.userEditSubmit = function (req, res) {
 	db.User.find({
 		where: {
 			'id': req.body.id
-		}		
+		}
 	}).then(user =>{
 		if(req.body.password.length>0){
 			if(req.body.password.length>0){
 				if (req.body.password == req.body.cpassword) {
 					user.password = bCrypt.hashSync(req.body.password, bCrypt.genSaltSync(10), null)
-				}else{
-					req.flash('warning', 'Passwords dont match')
-					res.render('app/useredit', {
-						userId: req.user.id,
-						userEmail: req.user.email,
-						userName: req.user.name,
-					})
-					return		
 				}
 			}else{
-				req.flash('warning', 'Invalid Password')
+				req.flash('warning', 'Passwords dont match')
 				res.render('app/useredit', {
 					userId: req.user.id,
 					userEmail: req.user.email,
 					userName: req.user.name,
 				})
-				return
+				return				
 			}
+		}else{
+			req.flash('warning', 'Invalid Password')
+			res.render('app/useredit', {
+				userId: req.user.id,
+				userEmail: req.user.email,
+				userName: req.user.name,
+			})
+			return
 		}
 		user.email = req.body.email
 		user.name = req.body.name
 		user.save().then(function () {
-			req.flash('success',"Updated successfully")
+			req.flash('success','Updated successfully')
 			res.render('app/useredit', {
 				userId: req.body.id,
 				userEmail: req.body.email,
@@ -232,12 +234,19 @@ module.exports.bulkProductsLegacy = function (req,res){
 
 module.exports.bulkProducts =  function(req, res) {
 	if (req.files.products && req.files.products.mimetype=='text/xml'){
-		var products = libxmljs.parseXmlString(req.files.products.data.toString('utf8'), {noent:true,noblanks:true})
+		var parser = new libxmljs.SAXParser({
+			noent: true,
+			noblanks: true,
+			dtdvalid: true,
+			normalize: true
+		});
+		parser.parseString(req.files.products.data.toString('utf8'));
+		var products = parser.doc;
 		products.root().childNodes().forEach( product => {
 			var newProduct = new db.Product()
 			newProduct.name = product.childNodes()[0].text()
 			newProduct.code = product.childNodes()[1].text()
-			newProduct.tags = product.childNodes()[2].text()
+		newProduct.tags = product.childNodes()[2].text()
 			newProduct.description = product.childNodes()[3].text()
 			newProduct.save()
 		})
