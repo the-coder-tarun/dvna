@@ -20,12 +20,7 @@ module.exports = function () {
     })
 
     router.get('/bulkproducts', authHandler.isAuthenticated, function (req, res) {
-        const legacy = req.query.legacy;
-        if (typeof legacy === 'string' && legacy.trim() !== '') {
-            res.render('app/bulkproducts', { legacy: legacy.trim() })
-        } else {
-            res.render('app/bulkproducts', { legacy: '' })
-        }
+        res.render('app/bulkproducts',{legacy:req.query.legacy})
     })
 
     router.get('/products', authHandler.isAuthenticated, appHandler.listProducts)
