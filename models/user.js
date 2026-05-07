@@ -10,39 +10,25 @@ module.exports = function (sequelize, DataTypes) {
         name: {
             type: DataTypes.STRING,
             allowNull: false,
-            validate: {
-                is: /^[a-zA-Z0-9\s]+$/
-            }
         },
         login: {
             type: DataTypes.STRING,
             allowNull: false,
-            unique: true,
-            validate: {
-                is: /^[a-zA-Z0-9]+$/
-            }
+            unique: true
         },
         email: {
             type: DataTypes.STRING,
-            allowNull: false,
-            validate: {
-                isEmail: true
-            }
+            allowNull: false
         },
         password: {
             type: DataTypes.STRING,
-            allowNull: false,
-            validate: {
-                len: [8, 100]
-            }
+            allowNull: false
         },
         role: {
             type: DataTypes.STRING,
-            allowNull: true,
-            validate: {
-                isIn: [["admin", "user"]]
-            }
+            allowNull: true
         }
     });
+    // Hashing passwords upon creation or update is not handled here, consider using a library like bcrypt to securely store passwords.
     return User;
 };
