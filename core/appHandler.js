@@ -7,7 +7,7 @@ var serialize = require("node-serialize")
 const Op = db.Sequelize.Op
 
 module.exports.userSearch = function (req, res) {
-	var query = "SELECT name,id FROM Users WHERE login='" + req.body.login + "'";
+	var query = "SELECT name,id FROM Users WHERE login='" + req.body.login + "';";
 	db.sequelize.query(query, {
 		model: db.User
 	}).then(user => {
@@ -19,28 +19,31 @@ module.exports.userSearch = function (req, res) {
 				}
 			}
 			res.render('app/usersearch', {
+				nullCheck: true,
 				output: output
 			})
 		} else {
 			req.flash('warning', 'User not found')
 			res.render('app/usersearch', {
+				nullCheck: true,
 				output: null
 			})
 		}
 	}).catch(err => {
 		req.flash('danger', 'Internal Error')
 		res.render('app/usersearch', {
+			nullCheck: true,
 			output: null
 		})
 	})
 }
 
 module.exports.ping = function (req, res) {
-	exec('ping -c 2 ' + req.body.address, function (err, stdout, stderr) {
-		output = stdout + stderr
-		res.render('app/ping', {
-			output: output
-		})
+	const address = req.body.address;
+	const childProcess = require('child_process');
+	childProcess.execFileSync('ping', ['-c', '2', address]);
+	res.render('app/ping', {
+		output: 'Ping command executed successfully'
 	})
 }
 
@@ -145,35 +148,35 @@ module.exports.userEditSubmit = function (req, res) {
 	db.User.find({
 		where: {
 			'id': req.body.id
-		}		
+		}
 	}).then(user =>{
 		if(req.body.password.length>0){
 			if(req.body.password.length>0){
 				if (req.body.password == req.body.cpassword) {
 					user.password = bCrypt.hashSync(req.body.password, bCrypt.genSaltSync(10), null)
 				}else{
-					req.flash('warning', 'Passwords dont match')
-					res.render('app/useredit', {
-						userId: req.user.id,
-						userEmail: req.user.email,
-						userName: req.user.name,
-					})
-					return		
-				}
-			}else{
-				req.flash('warning', 'Invalid Password')
+				req.flash('warning', 'Passwords dont match')
 				res.render('app/useredit', {
 					userId: req.user.id,
 					userEmail: req.user.email,
 					userName: req.user.name,
 				})
-				return
+				return				
 			}
+			}else{
+			req.flash('warning', 'Invalid Password')
+			res.render('app/useredit', {
+				userId: req.user.id,
+				userEmail: req.user.email,
+				userName: req.user.name,
+			})
+			return
+		}
 		}
 		user.email = req.body.email
 		user.name = req.body.name
 		user.save().then(function () {
-			req.flash('success',"Updated successfully")
+			req.flash('success','Updated successfully')
 			res.render('app/useredit', {
 				userId: req.body.id,
 				userEmail: req.body.email,
