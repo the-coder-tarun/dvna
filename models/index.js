@@ -4,16 +4,17 @@ var fs = require("fs");
 var path = require("path");
 var Sequelize = require("sequelize");
 var env = process.env.NODE_ENV || "development";
-var config = {
-  database: process.env.DB_NAME,
-  username: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  host: process.env.DB_HOST,
-  dialect: process.env.DB_DIALECT
-}
+var config = require("../config/db.js")
 
 if (process.env.DATABASE_URL) {
-  var sequelize = new Sequelize(process.env.DATABASE_URL);
+  var url = new URL(process.env.DATABASE_URL);
+  var sequelize = new Sequelize(url.pathname.substring(1), url.username, url.password, {
+    host: url.hostname,
+    dialect: url.protocol.substring(0, url.protocol.length - 1),
+    dialectOptions: {
+      ssl: true
+    }
+  });
 } else {
   var sequelize = new Sequelize(config.database, config.username, config.password, {
     host: config.host,
