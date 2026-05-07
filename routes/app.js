@@ -20,7 +20,12 @@ module.exports = function () {
     })
 
     router.get('/bulkproducts', authHandler.isAuthenticated, function (req, res) {
-        res.render('app/bulkproducts',{legacy:req.query.legacy})
+        const legacy = req.query.legacy;
+        if (typeof legacy === 'string' && legacy.trim() !== '') {
+            res.render('app/bulkproducts', { legacy: legacy.trim() })
+        } else {
+            res.render('app/bulkproducts', { legacy: '' })
+        }
     })
 
     router.get('/products', authHandler.isAuthenticated, appHandler.listProducts)
@@ -33,7 +38,7 @@ module.exports = function () {
         res.render('app/calc',{output:null})
     })
 
-    router.get('/admin', authHandler.isAuthenticated, function (req, res) {
+    router.get('/admin', authHandler.isAuthenticated, function (res, req) {
         res.render('app/admin', {
             admin: (req.user.role == 'admin')
         })
