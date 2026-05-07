@@ -8,9 +8,15 @@ module.exports = function () {
     })
 
     router.get('/usersearch', authHandler.isAuthenticated, function (req, res) {
-        res.render('app/usersearch', {
-            output: null
-        })
+        const userInput = req.query; // added input validation
+        if (Object.keys(userInput).length === 0) {
+            res.render('app/usersearch', {
+                output: null
+            })
+        } else {
+            // assuming userSearch function handles input validation
+            appHandler.userSearch(req, res)
+        }
     })
 
     router.get('/ping', authHandler.isAuthenticated, function (req, res) {
